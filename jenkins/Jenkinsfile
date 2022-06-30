@@ -4,12 +4,12 @@ pipeline {
         docker {
             image 'node:6-alpine'
             // passa parâmetros para o container
-            args '-p 3000:3000'
+            args '-p 3000:3000 -u root'
         }
     }
     // Defino uma variável de ambiente
     environment {
-        CI = true
+        CI = 'true'
     }
     stages {
         stage('Build') {
