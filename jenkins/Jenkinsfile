@@ -2,12 +2,15 @@ pipeline {
     // Trabalhamos com um agente global
     agent {
         docker {
-            image 'node:6-alpine'
+            // image 'node:6-alpine'
+            image 'node:lts-buster-slim'
             // passa parâmetros para o container
             args '-p 3000:3000 -u root'
         }
     }
-    // Defino uma variável de ambiente
+    // Defino uma variável de ambiente. Ela vai estar disponível para todas as etapas do pipeline.
+    // O script de teste verifica que essa variável está como true, e o test.sh é executado de forma não interativa.
+    // Mas também seria possível usar um modo interativo, em que o Jenkins espera a entrada do usuário.
     environment {
         CI = 'true'
     }
@@ -22,12 +25,15 @@ pipeline {
                 sh './jenkins/scripts/test.sh'
             }
         }
-//         stage('Deliver') {
-//             steps {
-//                 sh './jenkins/scripts/deliver.sh'
-//                 input message: 'Finished using the web site? (Click "Proceed" to continue)'
-//                 sh './jenkins/scripts/kill.sh'
-//             }
-//         }
+        stage('Deliver') {
+            steps {
+                // sobe a minha aplicação React
+                sh './jenkins/scripts/deliver.sh'
+                // Recebe um input do usuário
+                input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                // Quando o usuário terminar de testar e clicar em Proceed indicando que terminou o teste, eu paro o servidor web.
+                sh './jenkins/scripts/kill.sh'
+            }
+        }
     }
 }
